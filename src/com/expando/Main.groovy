@@ -14,7 +14,7 @@ class Main {
 		//initialization
 		
 		Scanner scanner = new Scanner(System.in)
-		
+		boolean flag = true
 		//set database connection
 		ServerConnection serverConn = new PostgreSQL(dbname:'sampledb')
 		DBManager manager = new DBManager(serverConn)
@@ -34,19 +34,29 @@ class Main {
 		System.out.println("INFORMATION : SQL Connection state is ${serverConn.getConnectionStatus()}")
 		System.out.println("INFORMATION : SQL Connection URL is ${serverConn.getConnectionURL()}\n")
 		
-		while(true){
+		while(flag){
 			
 			//SET USER INPUT
 			System.out.print(currentPerson + '>')
 			String userInput = scanner.nextLine()
 			userInput.trim().toLowerCase()
 			
+			//AS BACK
+			if(userInput.equals('exit')){
+				if(currentPerson.equals('SQL')){
+					flag = false
+					System.out.println("INFORMATION : Closing .... \n")
+				}else{
+					currentPerson = 'SQL'
+					id = 0
+				}
+			
 			//LIST OF PERSON
-			if(userInput.equals('list')){
+			}else if(userInput.equals('list')){
 				util.listCommand()
 			
 			//LIST OF COMMAND
-			}else if(userInput.equals('command')){
+			}else if(userInput.equals('commands')){
 				if(currentPerson.equals('SQL')){
 					System.out.println('Error : Please select a person.\n')
 				}else{
@@ -76,14 +86,32 @@ class Main {
 					}
 			//REMOVE PERSON
 			}else if(userInput.equals('drop')){
-			
+				String confirm = ''
+				if(!currentPerson.equals('SQL')){
+					
+					System.out.print("Are you sure you want to delete $currentPerson ? (y/n).")
+					confirm = new Scanner(System.in).nextLine()
+					
+					if(confirm.equals('y')){
+						System.out.println("You've successfully delete $currentPerson.")
+						manager.removePerson(id)
+						currentPerson = 'SQL'
+						id = 0
+						
+					}else{
+						System.out.println('INFORMATION : You canceled.')
+					}
+				}else
+					System.out.println('Error : Please select a person.\n')
+				
 			
 			//REMOVE COMMAND
 			}else if(userInput.equals('remove')){
 				try{
 					if(!currentPerson.equals('SQL')){
 						String command = ''
-						System.out.println('INFORMATION : command is case sensitive.')
+						System.out.println('INFORMATION : Your are in delete mode.')
+						System.out.println('INFORMATION : command name is case sensitive.')
 						System.out.print('Command Name: ')
 						command = new Scanner(System.in).nextLine()
 						
@@ -149,9 +177,13 @@ class Main {
 				//DO COMMAND	
 				}else if(data[0].equals('do')){
 					try{
-						Person person = manager.getPerson(id , listOfPerson)
-						String command = data[1]
-						System.out.println(person."$command"() + '\n')
+						if(!currentPerson.equals('SQL')){
+							Person person = manager.getPerson(id , listOfPerson)
+							String command = data[1]
+							System.out.println(person."$command"() + '\n')
+						}else{
+							System.out.println('Error : Please select a person.\n')
+						}
 						
 					}catch(Exception e){
 						System.out.println("ERROR : $currentPerson can\'t do the command.")

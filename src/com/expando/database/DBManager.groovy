@@ -70,11 +70,12 @@ class DBManager {
 			String sql = 'DELETE FROM tblperson WHERE id = ?'
 			PreparedStatement pst = conn.prepareStatement(sql)
 			pst.setInt(1 , id)
+			pst.executeUpdate()
 			
 			return 'INFORMATION : You performed a delete command.\n'
 			
 		}catch(Exception e){
-		
+			e.printStackTrace()
 		}
 	}
 	
